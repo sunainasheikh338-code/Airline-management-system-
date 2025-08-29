@@ -1,0 +1,196 @@
+Airline Management System Code by using Java:
+
+package Sem3.Java;
+
+import java.util.*;
+
+// Flight class to represent domestic or international flights
+class Flight {
+    private String flightNumber;
+    private String airlineName;
+    private String origin;
+    private String destination;
+    private String departureTime;
+    private String arrivalTime;
+    private boolean isInternational;
+    private int totalSeats;
+    private int availableSeats;
+
+    public Flight(String flightNumber, String airlineName, String origin, String destination, String departureTime, String arrivalTime, boolean isInternational, int totalSeats) {
+        this.flightNumber = flightNumber;
+        this.airlineName = airlineName;
+        this.origin = origin;
+        this.destination = destination;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
+        this.isInternational = isInternational;
+        this.totalSeats = totalSeats;
+        this.availableSeats = totalSeats; // Initially, all seats are available
+    }
+
+    public boolean bookSeat() {
+        if (availableSeats > 0) {
+            availableSeats--;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void cancelSeat() {
+        availableSeats++;
+    }
+
+    public String getFlightNumber() {
+        return flightNumber;
+    }
+
+    public String getDetails() {
+        return "Flight: " + flightNumber + " | Airline: " + airlineName + " | From: " + origin + " To: " + destination +
+                " | Departure: " + departureTime + " | Arrival: " + arrivalTime + " | International: " + isInternational +
+                " | Seats Available: " + availableSeats;
+    }
+}
+
+// Customer class to manage customer information
+class Customer {
+    private String name;
+    private String passportNumber;
+    private boolean isIndianCitizen;
+
+    public Customer(String name, String passportNumber, boolean isIndianCitizen) {
+        this.name = name;
+        this.passportNumber = passportNumber;
+        this.isIndianCitizen = isIndianCitizen;
+    }
+
+    public String getDetails() {
+        return "Customer: " + name + " | Passport: " + passportNumber + " | Indian Citizen: " + isIndianCitizen;
+    }
+}
+
+// Reservation class to handle booking and ticket generation
+class Reservation {
+    private Flight flight;
+    private Customer customer;
+    private String ticketNumber;
+    
+    public Reservation(Flight flight, Customer customer, String ticketNumber) {
+        this.flight = flight;
+        this.customer = customer;
+        this.ticketNumber = ticketNumber;
+    }
+
+    public String getTicketDetails() {
+        return "Ticket: " + ticketNumber + "\n" + flight.getDetails() + "\n" + customer.getDetails();
+    }
+}
+
+// AirlineSystem class to manage reservations and flight operations
+public class AirlineSystem {
+    private List<Flight> flights = new ArrayList<>();
+    private List<Reservation> reservations = new ArrayList<>();
+    private int ticketCounter = 1000;
+
+    // Method to add a flight
+    public void addFlight(Flight flight) {
+        flights.add(flight);
+    }
+
+    // Method to display all available flights
+    public void showAvailableFlights() {
+        System.out.println("\nAvailable Flights:");
+        for (Flight flight : flights) {
+            System.out.println(flight.getDetails());
+        }
+        System.out.println("-----------------------------------------------------");
+    }
+
+    // Method to book a flight
+    public String bookFlight(String flightNumber, Customer customer) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equals(flightNumber)) {
+                if (flight.bookSeat()) {
+                    String ticketNumber = "TICKET" + ticketCounter++;
+                    Reservation reservation = new Reservation(flight, customer, ticketNumber);
+                    reservations.add(reservation);
+                    return reservation.getTicketDetails();
+                } else {
+                    return "No seats available on flight " + flightNumber;
+                }
+            }
+        }
+        return "Flight not found";
+    }
+
+    // Method to view all reservations
+    public void viewReservations() {
+        for (Reservation reservation : reservations) {
+            System.out.println(reservation.getTicketDetails());
+            System.out.println("-----------------------------------------------------");
+        }
+    }
+
+    // Main method to simulate the system
+    public static void main(String[] args) {
+        AirlineSystem airlineSystem = new AirlineSystem();
+        Scanner scanner = new Scanner(System.in);
+
+        // Sample flights
+        airlineSystem.addFlight(new Flight("AI101", "Air India", "Delhi", "Mumbai", "10:00 AM", "12:00 PM", false, 100));
+        airlineSystem.addFlight(new Flight("AI102", "Air India", "Mumbai", "Chennai", "02:00 PM", "04:00 PM", false, 100));
+        airlineSystem.addFlight(new Flight("BA201", "British Airways", "Mumbai", "London", "09:00 PM", "06:00 AM", true, 50));
+        
+        // Sample usage
+        System.out.println("Welcome to the Airline Reservation System");
+        while (true) {
+            System.out.println("\nMenu:");
+            System.out.println("1. View available flights");
+            System.out.println("2. Book a flight");
+            System.out.println("3. View reservations");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    // Show available flights
+                    airlineSystem.showAvailableFlights();
+                    break;
+
+                case 2:
+                    // Booking process
+                    airlineSystem.showAvailableFlights(); // Show available flights before booking
+
+                    System.out.print("Enter your name: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Enter your passport number: ");
+                    String passportNumber = scanner.nextLine();
+                    System.out.print("Are you an Indian citizen? (true/false): ");
+                    boolean isIndianCitizen = scanner.nextBoolean();
+                    scanner.nextLine(); // Consume newline
+
+                    Customer customer = new Customer(name, passportNumber, isIndianCitizen);
+
+                    System.out.print("Enter flight number to book: ");
+                    String flightNumber = scanner.nextLine();
+
+                    String ticketDetails = airlineSystem.bookFlight(flightNumber, customer);
+                    System.out.println(ticketDetails);
+                    break;
+
+                case 3:
+                    airlineSystem.viewReservations();
+                    break;
+
+                case 4:
+                    System.out.println("Thank you for using the Airline Reservation System!");
+                    return;
+
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+}
